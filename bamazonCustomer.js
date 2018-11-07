@@ -69,17 +69,41 @@ var connection = mysql.createConnection({
        for(var i = 0; i < data.length; i++) {
          
          if(answer.Quantity > data[i].stock_quantity) {
-           console.log("Insufficient Quantitiy")
+           console.log("Insufficient Quantity");
+           start();
          } 
-        //  else {fufill();}
-          
+        else
+        {
+     
+      var newStock = data[i].stock_quantity - answer.Quantity;
+      var newSale = data[i].product_sales + (data[i].price * answer.Quantity);
+      connection.query(
+        "UPDATE products SET ? WHERE ?",
+        [
+          {
+            stock_quantity: newStock,
+            product_sales: newSale
+          },
+          {
+            item_id: answer.id,
+            item_id: answer.id
+          }
+        ],
+    
+        function(error) {
+          if (error) throw err;
+         
+          console.log("Successfully purchased " + answer.Quantity);
+          console.table(data);
+          start();
+        }
+        
+      ); 
+      } 
        }
     });
 });
 }
 
-// function fufill (){
-//   UPDATE Customers
-// SET ContactName='Alfred Schmidt', City='Frankfurt'
-// WHERE CustomerID=1;
-// }
+
+
