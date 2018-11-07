@@ -40,19 +40,46 @@ var connection = mysql.createConnection({
       name: "id",
       type: "input",
       message: "What is the ID of the item you would like to purchase?",
-      
+       // To validate whether the user's answer is a number
+      validate: function(value) {
+        if(isNaN(value)=== false){
+            return true;
+        }
+        return false;   
+     }
     },
     {
       name: "Quantity",
       type: "input",
       message: "How many would you like?",
-      
+      // To validate whether the user's answer is a number
+      validate: function(value) {
+        if(isNaN(value)=== false){
+            return true;
+        }
+        return false;   
+     }
     },
   ])
-    .then(function(answer) {
-      // based on their answer, either call the bid or the post functions
-      if (answer.pick === "Find songs by artist") {
-        findArtist();
-      }
+  .then(function(answer) {
+    // Check to see if stock quantity is greater than or equal to entered number
+    // "SELECT stock_quantity, item_id FROM products GROUP BY stock_quantity HAVING count(*) > ?";
+   var query = "SELECT * FROM products WHERE ?";
+    connection.query(query, { item_id: answer.id }, function(err, data) {
+       for(var i = 0; i < data.length; i++) {
+         
+         if(answer.Quantity > data[i].stock_quantity) {
+           console.log("Insufficient Quantitiy")
+         } 
+        //  else {fufill();}
+          
+       }
     });
-  }
+});
+}
+
+// function fufill (){
+//   UPDATE Customers
+// SET ContactName='Alfred Schmidt', City='Frankfurt'
+// WHERE CustomerID=1;
+// }
