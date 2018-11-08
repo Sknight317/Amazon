@@ -33,7 +33,9 @@ var connection = mysql.createConnection({
     });
   }
 
+  // Function to start the bamazon app
   function start() {
+    // Using inquirer to ask the user a question
     inquirer
     .prompt([
       {
@@ -45,6 +47,7 @@ var connection = mysql.createConnection({
         if(isNaN(value)=== false){
             return true;
         }
+        // stop if it's not a number
         return false;   
      }
     },
@@ -61,30 +64,39 @@ var connection = mysql.createConnection({
      }
     },
   ])
+  // DOne after asking the user questions
   .then(function(answer) {
     // Check to see if stock quantity is greater than or equal to entered number
-    // "SELECT stock_quantity, item_id FROM products GROUP BY stock_quantity HAVING count(*) > ?";
+   // Creating a query with mysql; select from prodcuts table
    var query = "SELECT * FROM products WHERE ?";
+   // Passing in the item id number that the user entered
     connection.query(query, { item_id: answer.id }, function(err, data) {
+      //For loop to loop through the data
        for(var i = 0; i < data.length; i++) {
-         
+         // If the user's answer for the quantity is greater than the quantitiy in the database
          if(answer.Quantity > data[i].stock_quantity) {
            console.log("Insufficient Quantity");
            start();
-         } 
-        else
-        {
-     
+         } else {
+      // Fucntion to update the mysql database and process the order
+      
+        // Creating a variable to the newstock; stock quantitiy in database - the user's entered stock
       var newStock = data[i].stock_quantity - answer.Quantity;
+      // Variable for the newsale; sale in database + the price of the product multiplied by the user's entered quantitiy
       var newSale = data[i].product_sales + (data[i].price * answer.Quantity);
+      //Logging the customers new total and rounding it to 2 decimal places
+      console.log("Your total is: $" + (data[i].price * answer.Quantity).toFixed(2));
       connection.query(
+        //Updating the products table in mysql
         "UPDATE products SET ? WHERE ?",
         [
           {
+            //Updating the stock qauntity to the new stock and the prouct sales to the newsale amount
             stock_quantity: newStock,
             product_sales: newSale
           },
           {
+            //Using the id number that the user types in
             item_id: answer.id,
             item_id: answer.id
           }
@@ -92,18 +104,18 @@ var connection = mysql.createConnection({
     
         function(error) {
           if (error) throw err;
-         
-          console.log("Successfully purchased " + answer.Quantity);
-          console.table(data);
-          start();
-        }
-        
-      ); 
+          console.log("Successfully purchased " + answer.Quantity + "."+ "\n");
+          // Calling the function to log to table and restart the app
+          afterConnection();   
+        } 
+      );
+     
       } 
        }
     });
 });
 }
+
 
 
 
